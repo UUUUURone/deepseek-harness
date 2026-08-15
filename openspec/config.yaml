@@ -1,0 +1,54 @@
+schema: spec-driven
+
+context: |
+  Project: DeepSeek Harness, a plugin-based agent harness built on vendored Cordis. Everything is a plugin: model adapters, tools, session persistence, settings, web UI, subagents, workflows, and runtime diagnostics all mount through Cordis configuration.
+
+  Stack:
+  - TypeScript, ESM, strict type checking, pnpm workspaces, Node ^22.19 || >=24.
+  - React client packages under packages/client/* and apps/web.
+  - Host/runtime packages under packages/* with Service Definition, Service Provider, and Consumer roles for capability seams.
+  - Documentation lives under docs/ and package READMEs, with bilingual pairs where present.
+
+  Architecture rules:
+  - Read docs/architecture.md before changing packages/.
+  - New behavior should attach to documented Cordis extension points. Changing agent-loop requires updating docs/architecture.md.
+  - Registrations are effects: use ctx.effect() / ctx.on(); register() returns a disposer.
+  - Capability work should define the complete Service Definition / Provider / Consumer story, not only one role.
+  - Model-visible input must be reconstructable from the session log; new model-visible input requires a session event.
+  - MCP tools are registered through ctx.tools by the MCP client bridge; UI or workflow features should use Harness capabilities instead of bypassing tool policy, approval, session logging, or presentation.
+
+  Code conventions:
+  - Use package names across packages and .ts in local relative imports.
+  - Keep boundaries explicit: parse/resolve config and durable/wire/model/tool JSON at entry points, then trust typed same-process values.
+  - Use branded opaque ids across package boundaries.
+  - Prefer maintained dependencies when they delete meaningful owned code and tests.
+  - Keep changes scoped; avoid compatibility shims before the first tagged release when a better foundation is available.
+
+  Documentation and tests:
+  - Non-trivial product, model-visible, protocol, or package-public changes update affected README/JSDoc/docs and add an Agent Note when required by .agents/notes/README.md.
+  - Product-user-visible behavior needs suitable snapshot or GUI evidence; model-visible changes need a keyless runnable snapshot when applicable.
+  - Select focused checks using the repository testing policy and dsh-pre-push-checks guidance; do not default to the full suite unless the change is repository-wide.
+
+  Current product investigation:
+  - The desired workflow editor should orchestrate Harness tools, MCP tools, subagents, approvals, and debugging through Harness-native services.
+  - cc-wf-studio may be used as research input for workflow schema, visual node vocabulary, CLI/MCP/export ideas, but its VS Code webview runtime should not be assumed to be a complete embeddable Harness workflow engine.
+  - A likely direction is a Harness-native React Flow editor that persists a DSH workflow specification and compiles or executes through ctx.workflowEngine / ctx.tools / ctx.agents.
+
+rules:
+  proposal:
+    - State the user problem, desired behavior, and why the change belongs in Harness rather than an external sidecar.
+    - Include explicit Non-goals for compatibility, migration, UI polish, and runtime execution when they are out of scope.
+    - Identify affected packages, docs, session events, model-visible surfaces, and test tiers.
+  design:
+    - Start from existing Cordis services and package ownership before introducing a new abstraction.
+    - Name the Service Definition, Provider, Consumer, UI, persistence, and testing responsibilities for capability work.
+    - Describe how approval policy, tool presentation, session logging, cancellation, and teardown behave.
+    - Call out license and distribution constraints for third-party workflow/UI assets.
+  specs:
+    - Write observable requirements with concrete scenarios and acceptance behavior.
+    - Cover invalid input, missing provider/config, cancellation, teardown, reload, and persistence paths when relevant.
+    - Keep durable/session-log requirements separate from transient UI state.
+  tasks:
+    - Order tasks by architecture, contracts, implementation, docs, tests, and verification.
+    - Include the smallest relevant local checks for each major surface.
+    - Add explicit follow-up tasks for Agent Notes, generated docs, snapshots, or browser GIFs when required by repository policy.

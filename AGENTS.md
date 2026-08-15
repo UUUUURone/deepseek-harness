@@ -49,6 +49,7 @@ python/      Python SDK and bundled runtime (see python/README.md)
 native/      @deepseek-ai/node-addon-landlock-run source of record (see native/README.md)
 examples/    Runnable cordis.yml leaves over packages/examples bundles (see examples/AGENTS.md)
 .agents/     Agent workflows and Agent Notes (`notes/`)
+openspec/    OpenSpec change proposals and capability specs
 docs/        architecture, generated catalogs, postmortems, cookbook (see docs/AGENTS.md)
 scripts/     repo gates and generators
 website/     VitePress projection of selected bilingual docs/ sources
@@ -77,6 +78,9 @@ pnpm run website:build  # VitePress build (doubles as dead-link check)
 pnpm dsh --profile headless "task"  # run one task from source (needs DEEPSEEK_API_KEY)
 pnpm run demo:cordis    # the agent modifies its own runtime (needs key)
 pnpm run demo:acp       # ACP automation server (needs DEEPSEEK_API_KEY)
+openspec list --json    # active OpenSpec changes; on Windows use openspec.cmd when PowerShell blocks openspec.ps1
+openspec status --change <name> --json  # artifact status for one change
+openspec validate --all # validate existing OpenSpec changes/specs
 ```
 
 ### Host sandbox failures
@@ -119,6 +123,7 @@ Real-API tests and demos read `DEEPSEEK_API_KEY`, optional `DEEPSEEK_BASE_URL`, 
 - Do not comment on facts obvious from code.
 - **Prefer symmetry for parallel values**; unexplained asymmetry usually signals a missed extraction.
 - **Tests describe behavior, not correctness.** Change obsolete behavior with its tests; explain why in the PR.
+- **OpenSpec plans non-trivial product changes before implementation.** Use `openspec/` for proposal, design, delta specs, and tasks when a change affects architecture, package contracts, model-visible behavior, durable data, or Web UI workflows. OpenSpec captures planned scope and acceptance behavior; Agent Notes capture shipped rationale and future decision value.
 - **Non-trivial changes MUST include an Agent Note in the same PR;** only mechanical/local edits are exempt ([scope](.agents/notes/README.md#when-to-write-one)). Archived notes are frozen: never edit or treat them as current authority ([archive policy](.agents/notes/README.md#archiving-and-deletion)).
 - **Testing policy** — [docs/testing.md](docs/testing.md). Every non-trivial model- or product-user-visible behavior change adds or updates a keyless snapshot through a real runnable example in the same PR; package tests, e2e-only assertions, and mock-only fixtures do not substitute for the assembled application transcript. Fixtures must replay on macOS/Linux; fix fixtures, not normalizers.
 - **A tool's UI render intent is part of its design**, decided up front (`generic`/`terminal`/`diff`, `locations`); presentation methods are pure functions of `args` ([cookbook](docs/cookbook/adding-a-tool.md)).
@@ -131,6 +136,10 @@ Real-API tests and demos read `DEEPSEEK_API_KEY`, optional `DEEPSEEK_BASE_URL`, 
 ## Defensive patterns
 
 Read [docs/defensive-patterns.md](docs/defensive-patterns.md) before lifecycle, concurrency, subprocess, or teardown work.
+
+## Workflow editor direction
+
+Workflow editing must use Harness-native runtime capabilities for execution, debugging, approval, tool policy, and session logging. `cc-wf-studio` can inform schema, visual node vocabulary, CLI/MCP/export ideas, or compatibility experiments, but do not treat its VS Code webview as the default embeddable workflow engine. Prefer a DSH workflow specification and Web UI editor that compile to or execute through `ctx.workflowEngine`, `ctx.tools`, and `ctx.agents`.
 
 ## Type safety and documentation
 
